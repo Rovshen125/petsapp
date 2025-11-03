@@ -19,6 +19,8 @@ const TabNav = () => {
             <Tab.Screen name='add' component={AddScreen} />
             <Tab.Screen name='liked' component={LikedScreen} />
             <Tab.Screen name='profile' component={ProfilScreen} />
+            <Tab.Screen name="etrafli" component={EtrafliScreen} /> 
+
         </Tab.Navigator>
     )
 }
@@ -31,8 +33,7 @@ export default function () {
                 screenOptions={{ headerShown: false }}
             >
                 <Stack.Screen name="Tabs" component={TabNav} />
-                {/* <Stack.Screen name="calendar" component={CalendarScreen} />
-                <Stack.Screen name="etrafli" component={EtrafliScreen} /> */}
+                {/* <Stack.Screen name="calendar" component={CalendarScreen} />*/}
             </Stack.Navigator>
         </NavigationContainer>
     )

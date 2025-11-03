@@ -17,6 +17,7 @@ export default function TabBar({ state, descriptors, navigation }) {
             <View className='flex-row justify-center bg-[#391151] mx-10 rounded-xl gap-5 p-3'>
                 {state.routes.map((route, index) => {
                     const isFocused = state.index === index;
+                     if (route.name === 'etrafli') return null;
 
                     return (
                         <TouchableOpacity
