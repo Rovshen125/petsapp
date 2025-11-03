@@ -1,10 +1,23 @@
-import { View, Text } from 'react-native'
+import { View, Text, Image, Linking, Alert, TouchableOpacity } from 'react-native'
 import React from 'react'
+import { catsData } from '../data'
+import { SafeAreaView } from 'react-native-safe-area-context';
+import HeaderSearch from '../components/HeaderSearch';
+import HomeHeaderScroll from '../components/HomeHeaderScroll';
+import HomeNews from '../components/HomeNews';
 
 export default function HomeScreen() {
+  const openLocation = (lat, lng) => {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert("Xəritə açıla bilmədi");
+    });
+  };
   return (
-    <View className='flex-1 justify-center items-center bg-red-500'>
-      <Text>HomeScreen</Text>
-    </View>
+    <SafeAreaView>
+        <HeaderSearch />
+        <HomeHeaderScroll />
+        <HomeNews />
+    </SafeAreaView>
   )
 }
