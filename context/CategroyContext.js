@@ -9,6 +9,7 @@ export const CatProvider = ({ children }) => {
     const [filteredCat, setFilteredCat] = useState('')
     const [readyData, setReadyData] = useState([])
     const [likeds, setLikeds] = useState([])
+    const [userStatus, setUserStatus] = useState(false)
 
 
     useEffect(() => {
@@ -52,7 +53,7 @@ const handlerLike = (par)=>{
 
 
     return (
-        <CategoryContext.Provider value={{ readyData, setFilteredData, filteredCat, setFilteredCat,giveMeFive, handlerLike,likeds }}>
+        <CategoryContext.Provider value={{userStatus, setUserStatus, readyData, setFilteredData, filteredCat, setFilteredCat,giveMeFive, handlerLike,likeds }}>
             {children}
         </CategoryContext.Provider>
     )

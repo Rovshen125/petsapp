@@ -1,50 +1,62 @@
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
-import React, { useState, useEffect, useContext } from 'react'
-import { Ionicons } from '@expo/vector-icons';
-import colors from '../constants/colors';
-import axios from 'axios';
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import "./global.css";
+import MainNav from './navigation';
+import { CatProvider } from './context/CategroyContext';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert } from 'react-native';
-import UsersPage from '../components/UsersPage'
-import { CategoryContext } from '../context/CategroyContext';
+import axios from "axios";
 
-
-
-
-
-
-export default function ProfilScreen() {
+export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
+  const [mode, setMode] = useState("login"); // login / register
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState(null);
-  const [mode, setMode] = useState("login"); // login / register
+  const timerRef = useRef(null);
 
-  const {setUserStatus} = useContext(CategoryContext)
-
-useEffect(() => {
-  const loadToken = async () => {
-    const t = await AsyncStorage.getItem("token");
-    if (t) {
-      setToken(t)
-      setUserStatus(true)
+  // Token yoxlanışı
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const t = await AsyncStorage.getItem("token");
+        if (t) {
+          setToken(t);
+          startTokenTimer();
+        }
+      } catch (err) {
+        console.log("Token oxunmadı:", err);
+      } finally {
+        setLoading(false);
+      }
     };
-  };
-  loadToken();
-}, []);
+    checkToken();
 
+    return () => clearTimeout(timerRef.current);
+  }, []);
+
+  // Token müddəti 10s → logout
+  const startTokenTimer = () => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
+      await AsyncStorage.removeItem("token");
+      setToken(null);
+      Alert.alert("Logout", "Tokenin müddəti bitdi. Yenidən giriş edin.");
+    }, 10000); // 10 saniyə
+  };
+
+  // Login funksiyası
   const handleLogin = async () => {
     try {
       const { data } = await axios.post("http://192.168.1.73:5000/api/auth/login", { email, password });
       await AsyncStorage.setItem("token", data.token);
       setToken(data.token);
-      setUserStatus(true)
+      startTokenTimer();
       Alert.alert("Uğur", "Giriş uğurla tamamlandı!");
     } catch (err) {
       Alert.alert("Xəta", err.response?.data?.message || "Xəta baş verdi");
     }
   };
-
 
   // Register funksiyası
   const handleRegister = async () => {
@@ -52,21 +64,27 @@ useEffect(() => {
       const { data } = await axios.post("http://192.168.1.73:5000/api/auth/register", { email, nickname, password });
       await AsyncStorage.setItem("token", data.token);
       setToken(data.token);
-      setUserStatus(true)
+      startTokenTimer();
       Alert.alert("Uğur", "Qeydiyyat uğurla tamamlandı!");
     } catch (err) {
       Alert.alert("Xəta", err.response?.data?.message || "Xəta baş verdi");
     }
   };
 
-  // Token varsa 
- if (token) return <UsersPage setToken={setToken} />
+  if (loading) return (
+    <View className="flex-1 justify-center items-center bg-white">
+      <ActivityIndicator size="large" color="#4f46e5"/>
+    </View>
+  );
+
+  // Token varsa MainNav göstər
+  if (token) return <CatProvider><MainNav token={token} setToken={setToken} /></CatProvider>;
 
   // Token yoxdursa login/register form göstər
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#f3f4f6" }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
-        <Text style={{color:colors.primary}} className="text-3xl font-bold mb-6 ">{mode === "login" ? "Giriş" : "Qeydiyyat"}</Text>
+        <Text className="text-3xl font-bold mb-6 text-indigo-600">{mode === "login" ? "Giriş" : "Qeydiyyat"}</Text>
 
         {mode === "register" && (
           <TextInput
@@ -94,8 +112,7 @@ useEffect(() => {
         />
 
         <TouchableOpacity
-          className="w-full p-4 rounded-lg mb-4"
-          style={{backgroundColor:colors.primary}}
+          className="w-full bg-indigo-600 p-4 rounded-lg mb-4"
           onPress={mode === "login" ? handleLogin : handleRegister}
         >
           <Text className="text-white text-center font-bold">{mode === "login" ? "Giriş et" : "Qeydiyyatdan keç"}</Text>
@@ -110,4 +127,3 @@ useEffect(() => {
     </KeyboardAvoidingView>
   );
 }
-
